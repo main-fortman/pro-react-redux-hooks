@@ -65,11 +65,9 @@ const Notification = () => {
   return show ? <div>Hello!</div> : null;
 }
 
-const PlanetInfo = ({ id }) => {
-  
+const usePlanetInfo = (id) => {
   const [text, setText] = useState('Loading...');
-
-  
+ 
   useEffect(() => {
     setText('Loading...');
 
@@ -93,8 +91,15 @@ const PlanetInfo = ({ id }) => {
     }
   }, [id]);
 
+  return text;
+}
+
+const PlanetInfo = ({ id }) => {
+  
+  const name = usePlanetInfo(id);
+
   return <div>
-    Planet Name: {text}
+    Planet Name: {name}
   </div>
 }
 
