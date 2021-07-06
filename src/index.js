@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useContext, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { TestConext } from './context';
@@ -12,6 +13,7 @@ const HookSwitcher = () => {
 
   return (
     <div style={{ padding: '10px', backgroundColor: color, fontSize: fontSize + 'px' }}>
+      <PlanetInfo id={context.value}/>
       <button onClick={() => setColor('red')}>Red</button>
       <button onClick={() => setColor('white')}>White</button>
       <button onClick={() => setFontSize(s => s + 1)}>+</button>
@@ -59,15 +61,53 @@ const Notification = () => {
   useEffect(() => {
     setTimeout(() => setShow(false), 1500);
   }, []);
+  
   return show ? <div>Hello!</div> : null;
+}
+
+const PlanetInfo = ({ id }) => {
+  
+  const [text, setText] = useState('Loading...');
+
+  
+  useEffect(() => {
+    setText('Loading...');
+
+    const cancelSource = axios.CancelToken.source();
+
+    axios.get('https://swapi.dev/api/planets/' + id, {
+      cancelToken: cancelSource.token
+    })
+      .then(request => setText(request.data.name))
+      .catch(e => {
+        if (axios.isCancel(e)) {
+          console.log(e);
+        } else {
+          setText('Error!');
+          console.log(e);
+        }
+      });
+    
+    return () => {
+      cancelSource.cancel('Request canceled');
+    }
+  }, [id]);
+
+  return <div>
+    Planet Name: {text}
+  </div>
 }
 
 const App = () => {
 
-  const [ contextValue, setContextValue ] = useState(10);
+  const [ contextValue, setContextValue ] = useState(1);
 
   return <div>
-    <TestConext.Provider value={{label: 'Context Button', value: contextValue, change: setContextValue}}>
+    <TestConext.Provider value={{
+      label: 'Change Context Value',
+      value: contextValue,
+      change: setContextValue
+    }}>
       <HookSwitcher />
     </TestConext.Provider>
   </div>
